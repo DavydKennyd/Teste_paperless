@@ -53,16 +53,16 @@ function normalizeHeader(h: string) {
 
 const headerMap: Record<string, keyof Cliente> = {
   "cliente novo": "nome",
-  nome: "nome",
-  cpf: "cpf",
-  estado: "estado",
-  cidade: "cidade",
+  "nome": "nome",
+  "cpf": "cpf",
+  "estado": "estado",
+  "cidade": "cidade",
   "responsavel da fidelizacao": "responsavelFidelizacao",
   "responsavel pela fidelizacao": "responsavelFidelizacao",
   "responsavel fidelizacao": "responsavelFidelizacao",
   "acoes informadas": "acoesInformadas",
-  situacao: "situacao",
-  pendencias: "pendencias",
+  "situacao": "situacao",
+  "pendencias": "pendencias",
   "data da procuracao": "dataProc",
   "data do envio da procuracao": "dataEnvioProc",
   "data limite para cadastro": "dataLimiteCadastro",
@@ -74,7 +74,7 @@ const headerMap: Record<string, keyof Cliente> = {
   "quantos dias está atrasado": "diasAtrasado",
   "responsavel pelo cadastramento": "responsavelCadastramento",
   "responsavel pelo cadastro": "responsavelCadastramento",
-  responsavel: "responsavelCadastramento",
+  "responsavel": "responsavelCadastramento",
 };
 
 function mapHeaderToKey(normalized: string): keyof Cliente | undefined {
@@ -83,7 +83,9 @@ function mapHeaderToKey(normalized: string): keyof Cliente | undefined {
 
   // fallback: check if normalized contains a known substring
   for (const k of Object.keys(headerMap)) {
-    if (normalized.includes(k)) return headerMap[k];
+    // normaliza a chave do headerMap para garantir robustez
+    const nk = normalizeHeader(k);
+    if (normalized.includes(nk)) return headerMap[k];
   }
   return undefined;
 }
@@ -150,12 +152,21 @@ export default function RelatorioCadastros() {
       const worksheet = workbook.Sheets[sheetName];
       const raw: RawRow[] = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-      const mapped: Cliente[] = raw.map((row) => {
+      if (raw.length > 0) {
+        const headers = Object.keys(raw[0]);
+        console.log("Cabeçalhos do Excel:", headers);
+        console.log("Cabeçalhos normalizados:", headers.map(normalizeHeader));
+      }
+
+      const mapped: Cliente[] = raw.map((row, idx) => {
         const out: Cliente = { raw: row };
         Object.entries(row).forEach(([h, v]) => {
           const nh = normalizeHeader(h);
           const key = mapHeaderToKey(nh);
-          if (!key) return;
+          if (!key) {
+            console.log(`Linha ${idx + 1}: Cabeçalho não mapeado:`, h, '->', nh);
+            return;
+          }
           switch (key) {
             case "dataProc":
             case "dataEnvioProc":
@@ -183,6 +194,8 @@ export default function RelatorioCadastros() {
         }
         return out;
       });
+
+      console.log("Primeiro(s) objeto(s) mapeado(s):", mapped.slice(0, 2));
 
       setClientes(mapped);
       setPreviewRows(mapped.slice(0, 10));
