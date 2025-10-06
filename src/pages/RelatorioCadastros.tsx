@@ -465,26 +465,35 @@ export default function RelatorioCadastros() {
             {/* Pendencias Pie */}
             <section>
               <h2 className="text-xl font-bold mb-4 text-gray-700">Top 6 Pendências por tipo</h2>
-              <div className="w-full h-80 flex justify-center items-center bg-gray-50 p-4 rounded-lg">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pendenciasArray.slice(0, 6)}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={120}
-                      // CORREÇÃO: Usando 'any' para evitar o erro 'percent' is of type 'unknown'
-                      label={({ name, percent }: any) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                      innerRadius={50}
-                    >
-                      {pendenciasArray.slice(0, 6).map((entry, idx) => (
-                        <Cell key={entry.name} fill={COLORS[idx % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value, name, props) => [`${value} (${((props as any).payload.percent * 100).toFixed(1)}%)`, name]} />
-                    <Legend layout="horizontal" verticalAlign="bottom" align="center" />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="w-full h-80 flex flex-row justify-center items-center bg-gray-50 p-4 rounded-lg gap-8">
+                <div className="flex-1 h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pendenciasArray.slice(0, 6)}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={100}
+                        label={({ name, percent }: any) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                        innerRadius={50}
+                      >
+                        {pendenciasArray.slice(0, 6).map((entry, idx) => (
+                          <Cell key={entry.name} fill={COLORS[idx]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value, name, props) => [`${value} (${((props as any).payload.percent * 100).toFixed(1)}%)`, name]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-col justify-center h-full min-w-[180px]">
+                  {pendenciasArray.slice(0, 6).map((entry, idx) => (
+                    <div key={entry.name} className="flex items-center mb-3 last:mb-0">
+                      <span className="inline-block w-5 h-5 rounded mr-2 border" style={{ backgroundColor: COLORS[idx] }}></span>
+                      <span className="font-medium text-gray-700">{entry.name}</span>
+                      <span className="ml-auto text-gray-500 font-semibold">{entry.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
 
