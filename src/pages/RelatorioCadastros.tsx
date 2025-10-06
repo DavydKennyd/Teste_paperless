@@ -1,3 +1,4 @@
+
 // Adição do CDN do Tailwind CSS para garantir o visual da prévia.
 // Note: No ambiente Canvas, o Tailwind é frequentemente injetado automaticamente, mas
 // garantimos a presença aqui para ambientes que exigem o script explícito.
@@ -162,8 +163,39 @@ function splitPendencias(raw: any): string[] {
 
 /* -------------------- Component -------------------- */
 export default function RelatorioCadastros() {
+
+  // ...existing code...
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [previewRows, setPreviewRows] = useState<Cliente[]>([]);
+
+  // Função para normalizar texto para busca robusta
+  function normalizeText(s: string) {
+    return (s || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  // --- Comparação Interno vs Externo (fidelização) ---
+  // (deve ser calculado após clientes e normalizeText)
+  const clientesNovos = clientes.filter((c) =>
+    normalizeText(c.acoesInformadas || "").includes("novo")
+    || normalizeText(c.situacao || "").includes("concluido")
+  );
+  let interno = 0;
+  let externo = 0;
+  clientesNovos.forEach((c) => {
+    const resp = (c.responsavelFidelizacao || "").trim().toLowerCase();
+    if (resp === "comercial 1") {
+      interno++;
+    } else if (resp) {
+      externo++;
+    }
+  });
+  const comparacaoFidelizacao = [
+    { tipo: "Interno (Comercial 1)", total: interno },
+    { tipo: "Externo (outros)", total: externo },
+  ];
   const [isLibraryReady, setIsLibraryReady] = useState(false);
   const reportRef = useRef<HTMLDivElement | null>(null);
 
@@ -282,12 +314,7 @@ export default function RelatorioCadastros() {
   /* --------------- Metrics --------------- */
   const total = clientes.length;
   // Função para normalizar texto para busca robusta
-  function normalizeText(s: string) {
-    return (s || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }
+
 
   // Usando 'concluido' como status de cliente novo/cadastrado, conforme o seu dado de exemplo
   const totalNovos = clientes.filter((c) =>
@@ -446,7 +473,27 @@ export default function RelatorioCadastros() {
           </div>
 
           <div ref={reportRef} className="bg-white p-6 rounded-xl shadow-lg space-y-8 print:shadow-none print:p-0">
-            
+            {/* Comparação Interno vs Externo */}
+            <section>
+              <h2 className="text-xl font-bold mb-4 text-gray-700">Comparação: Interno X Externo</h2>
+              <div className="w-full h-64 bg-gray-50 p-4 rounded-lg">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={comparacaoFidelizacao} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <XAxis dataKey="tipo" stroke="#333" className="text-xs" />
+                    <YAxis stroke="#333" className="text-xs" allowDecimals={false} />
+                    <Tooltip
+                      formatter={(value, name, props) => {
+                        // value = número de cadastros, name = 'value', props.payload.name = cidade
+                        return [value, `Cidade: ${(props && props.payload && props.payload.name) || ''}`];
+                      }}
+                      labelFormatter={(label) => `Cidade: ${label}`}
+                    />
+                    <Bar dataKey="total" fill="#f59e42" radius={[10, 10, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
+
             {/* Top Cities */}
             <section>
               <h2 className="text-xl font-bold mb-4 text-gray-700">Top cidades (maiores cadastros)</h2>
