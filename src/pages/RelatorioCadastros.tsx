@@ -163,6 +163,7 @@ function splitPendencias(raw: any): string[] {
 
 /* -------------------- Component -------------------- */
 export default function RelatorioCadastros() {
+  // ...existing code...
 
   // ...existing code...
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -196,6 +197,18 @@ export default function RelatorioCadastros() {
     { tipo: "Interno (Comercial 1)", total: interno },
     { tipo: "Externo (outros)", total: externo },
   ];
+
+  // --- Comparação de fechamentos por estado (RN, MA, RJ, SP) ---
+  // Considera apenas clientes novos/concluídos
+  const estadosComparar = ["RN", "MA", "RJ", "SP"];
+  const fechamentoPorEstado: Record<string, number> = { RN: 0, MA: 0, RJ: 0, SP: 0 };
+  clientesNovos.forEach((c) => {
+    const estado = (c.estado || "").trim().toUpperCase();
+    if (estadosComparar.includes(estado)) {
+      fechamentoPorEstado[estado] = (fechamentoPorEstado[estado] || 0) + 1;
+    }
+  });
+  const comparacaoEstados = estadosComparar.map(uf => ({ estado: uf, total: fechamentoPorEstado[uf] }));
   const [isLibraryReady, setIsLibraryReady] = useState(false);
   const reportRef = useRef<HTMLDivElement | null>(null);
 
@@ -418,6 +431,8 @@ export default function RelatorioCadastros() {
 
       <h1 className="text-3xl font-extrabold mb-6 text-gray-800 border-b pb-2">Relatório de Cadastros</h1>
 
+
+
       <div className="mb-8 p-4 bg-white shadow-lg rounded-xl">
         <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
           Carregar Planilha (.xlsx, .xls)
@@ -473,6 +488,20 @@ export default function RelatorioCadastros() {
           </div>
 
           <div ref={reportRef} className="bg-white p-6 rounded-xl shadow-lg space-y-8 print:shadow-none print:p-0">
+            {/* Comparação de fechamentos por estado */}
+            <section>
+              <h2 className="text-xl font-bold mb-4 text-gray-700">Fechamentos por Estado (RN, MA, RJ, SP)</h2>
+              <div className="w-full h-64 bg-gray-50 p-4 rounded-lg mb-8">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={comparacaoEstados} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <XAxis dataKey="estado" stroke="#333" className="text-xs" />
+                    <YAxis stroke="#333" className="text-xs" allowDecimals={false} />
+                    <Tooltip formatter={(value, name, props) => [value, `Estado: ${(props && props.payload && props.payload.estado) || ''}`]} labelFormatter={label => `Estado: ${label}`} />
+                    <Bar dataKey="total" fill="#f59e42" radius={[10, 10, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
             {/* Comparação Interno vs Externo */}
             <section>
               <h2 className="text-xl font-bold mb-4 text-gray-700">Comparação: Interno X Externo</h2>
