@@ -421,7 +421,7 @@ export default function RelatorioCadastros() {
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A28BFF", "#FF6B8A"];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen font-sans">
+  <div className="p-0 bg-gray-50 min-h-screen font-sans w-full min-h-[100vh] overflow-x-hidden px-4 md:px-8">
       {/* Script do Tailwind CSS para garantir o estilo */}
       <script src="https://cdn.tailwindcss.com"></script>
       {/* Scripts CDN para o ambiente de arquivo único */}
@@ -429,11 +429,11 @@ export default function RelatorioCadastros() {
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-      <h1 className="text-3xl font-extrabold mb-6 text-gray-800 border-b pb-2">Relatório de Cadastros</h1>
+  <h1 className="text-3xl font-extrabold mb-6 text-gray-800 border-b pb-2 w-full">Relatório de Cadastros</h1>
 
 
 
-      <div className="mb-8 p-4 bg-white shadow-lg rounded-xl">
+  <div className="mb-8 p-4 bg-white shadow-lg rounded-xl w-full max-w-none">
         <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
           Carregar Planilha (.xlsx, .xls)
         </label>
@@ -487,7 +487,7 @@ export default function RelatorioCadastros() {
             </div>
           </div>
 
-          <div ref={reportRef} className="bg-white p-6 rounded-xl shadow-lg space-y-8 print:shadow-none print:p-0">
+          <div ref={reportRef} className="bg-white p-6 rounded-xl shadow-lg space-y-8 print:shadow-none print:p-0 w-full max-w-none">
             {/* Comparação de fechamentos por estado */}
             <section>
               <h2 className="text-xl font-bold mb-4 text-gray-700">Fechamentos por Estado (RN, MA, RJ, SP)</h2>
